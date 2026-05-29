@@ -29,8 +29,15 @@ save.dat
 game.db
 
 # --- Dev preview/screenshot scratch ---
-_*_preview.png
-_*_check.py
+# Anything at root starting with "_" except _smoketest.py.
+/_*.png
+/_*_check.py
+/_audio_*.py
+/_pause_*.py
+/_relogin_*.py
+/_sprite_*.py
+/_gameplay_*.png
+/_sprite_*.png
 
 # --- GDD extraction scratch ---
 _gdd_*
