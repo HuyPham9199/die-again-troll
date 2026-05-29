@@ -14,18 +14,19 @@ from ui.widgets import Button, Slider, draw_panel, draw_starfield
 
 
 # Vertical anchors for the page — change ONE place, layout reflows.
-PAGE_TITLE_Y = 30
-SECT_ACCOUNT_Y = 80
-SECT_AUDIO_Y = 184
-SECT_DISPLAY_Y = 340
-BACK_Y = 458
+PAGE_TITLE_Y = 24
+SECT_ACCOUNT_Y = 74
+SECT_AUDIO_Y = 174
+SECT_DISPLAY_Y = 320
+BACK_Y = 502
 
 PANEL_X = 80
 PANEL_W = 800
 # Distance from a section header's top to the panel start.
-HEADER_TO_PANEL = 24
-# Audio panel only needs to fit 2 sliders now (was 3).
-AUDIO_PANEL_H = 120
+HEADER_TO_PANEL = 22
+# Panel heights tuned to fit content + breathing room.
+AUDIO_PANEL_H = 116
+DISPLAY_PANEL_H = 144  # holds 3 toggle rows
 
 
 class SettingsState(State):
@@ -74,17 +75,26 @@ class SettingsState(State):
         )
         self.sliders = [s_music, s_sfx]
 
-        # --- Display toggles (side-by-side) ----------------------------
+        # --- Display: 3 stacked rows -----------------------------------
+        # row1 = resolution mode, row2 = FPS, row3 = touch.
         disp_top = SECT_DISPLAY_Y + HEADER_TO_PANEL
-        # One row inside the panel; left half = FPS, right half = mobile.
-        col_h_center = disp_top + 36
+        row_y0 = disp_top + 14
+        row_h = 36
+        # Buttons sit right-aligned inside the panel.
+        btn_w = 220
+        btn_x = PANEL_X + PANEL_W - 20 - btn_w
+        self.mode_btn = Button(
+            pygame.Rect(btn_x, row_y0, btn_w, 32),
+            self._mode_label(),
+            on_click=self._toggle_mode,
+        )
         self.fps_btn = Button(
-            pygame.Rect(PANEL_X + 280, col_h_center - 16, 130, 32),
+            pygame.Rect(btn_x, row_y0 + row_h, btn_w, 32),
             self._fps_label(),
             on_click=self._toggle_fps,
         )
         self.mobile_btn = Button(
-            pygame.Rect(PANEL_X + PANEL_W - 150, col_h_center - 16, 130, 32),
+            pygame.Rect(btn_x, row_y0 + row_h * 2, btn_w, 32),
             self._mobile_label(),
             on_click=self._toggle_mobile,
         )
@@ -104,6 +114,10 @@ class SettingsState(State):
     def _mobile_label(self) -> str:
         return "ON" if self.settings.get("show_mobile_controls", False) else "OFF"
 
+    def _mode_label(self) -> str:
+        m = self.settings.get("display_mode", "windowed")
+        return "FULLSCREEN" if m == "fullscreen" else "WINDOWED 16:9"
+
     def _toggle_fps(self):
         self._set_setting("show_fps", not self.settings.get("show_fps", True))
         self.fps_btn.text = self._fps_label()
@@ -112,6 +126,13 @@ class SettingsState(State):
         self._set_setting("show_mobile_controls",
                           not self.settings.get("show_mobile_controls", False))
         self.mobile_btn.text = self._mobile_label()
+
+    def _toggle_mode(self):
+        cur = self.settings.get("display_mode", "windowed")
+        new = "fullscreen" if cur == "windowed" else "windowed"
+        self._set_setting("display_mode", new)
+        self.engine.set_display_mode(new)
+        self.mode_btn.text = self._mode_label()
 
     def _login_clicked(self):
         if self.engine.save_data.get("username"):
@@ -144,6 +165,7 @@ class SettingsState(State):
             self._back()
             return
         self.login_btn.handle_event(event)
+        self.mode_btn.handle_event(event)
         self.fps_btn.handle_event(event)
         self.mobile_btn.handle_event(event)
         self.back_btn.handle_event(event)
@@ -197,26 +219,19 @@ class SettingsState(State):
         # ---- DISPLAY section ----
         self._draw_section_header(surface, "DISPLAY", SECT_DISPLAY_Y)
         disp_top = SECT_DISPLAY_Y + HEADER_TO_PANEL
-        disp_rect = pygame.Rect(PANEL_X, disp_top, PANEL_W, 72)
+        disp_rect = pygame.Rect(PANEL_X, disp_top, PANEL_W, DISPLAY_PANEL_H)
         draw_panel(surface, disp_rect)
 
-        # Inline labels for the two toggles; each sits to the LEFT of its
-        # button and shares the same vertical centre so they read as a row.
-        lbl_fps = engine.font_sm.render(
-            "Show FPS counter", True, config.COLOR_TEXT,
+        rows = (
+            ("Resolution",        self.mode_btn),
+            ("Show FPS counter",  self.fps_btn),
+            ("Touch controls",    self.mobile_btn),
         )
-        surface.blit(lbl_fps,
-                     (disp_rect.x + 20,
-                      self.fps_btn.rect.centery - lbl_fps.get_height() // 2))
-        lbl_touch = engine.font_sm.render(
-            "Touch controls", True, config.COLOR_TEXT,
-        )
-        # Position the touch label so it sits cleanly left of its button.
-        surface.blit(lbl_touch,
-                     (self.fps_btn.rect.right + 40,
-                      self.mobile_btn.rect.centery - lbl_touch.get_height() // 2))
-        self.fps_btn.draw(surface, engine.font_md)
-        self.mobile_btn.draw(surface, engine.font_md)
+        for label_text, btn in rows:
+            lbl = engine.font_sm.render(label_text, True, config.COLOR_TEXT)
+            surface.blit(lbl, (disp_rect.x + 22,
+                               btn.rect.centery - lbl.get_height() // 2))
+            btn.draw(surface, engine.font_md)
 
         # Back button.
         self.back_btn.draw(surface, engine.font_md)

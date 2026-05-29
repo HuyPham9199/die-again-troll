@@ -21,6 +21,9 @@ DEFAULT_SETTINGS: dict[str, Any] = {
     "sfx_volume": 80,
     "show_fps": True,
     "show_mobile_controls": False,
+    # "windowed" → 960x540 window. "fullscreen" → native resolution with
+    # pygame's SCALED flag so all game logic still runs in 960x540 space.
+    "display_mode": "windowed",
 }
 
 DEFAULT_DATA: dict[str, Any] = {

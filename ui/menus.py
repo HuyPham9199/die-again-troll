@@ -36,7 +36,10 @@ class BootState(State):
         # Apply saved audio volumes now that save_data is loaded — the
         # rest of the game can play sounds at the user's chosen level
         # from the very first frame.
-        audio.apply_settings(save_mgr.get_settings(engine.save_data))
+        settings = save_mgr.get_settings(engine.save_data)
+        audio.apply_settings(settings)
+        # Apply the saved display mode (fullscreen / windowed).
+        engine.set_display_mode(settings.get("display_mode", "windowed"))
         # If a user is logged in, pull the latest progress from DB so the
         # local cache reflects whatever happened on another device.
         if engine.save_data.get("user_id"):

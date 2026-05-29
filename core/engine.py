@@ -18,21 +18,16 @@ from ui.branding import make_logo
 class Engine:
     def __init__(self):
         pygame.init()
-        # Mixer must be init'd before any Sound() call. Doing it here means
-        # state/code paths that play audio at construction time also work.
         audio.init()
-        # Set the window icon *before* creating the display so the OS uses
-        # our logo from the very first frame.
         pygame.display.set_caption(config.TITLE)
         try:
             pygame.display.set_icon(make_logo(32))
         except Exception:
-            # If icon creation fails (very old pygame, missing SDL2 image
-            # support, etc.) we'd rather keep the default than crash.
             pass
-        self.screen = pygame.display.set_mode(
-            (config.SCREEN_WIDTH, config.SCREEN_HEIGHT)
-        )
+        # Display starts windowed; BootState reads the saved setting and
+        # may switch to fullscreen once save.dat is loaded.
+        self.display_mode = "windowed"
+        self.screen = self._make_display(self.display_mode)
         self.clock = pygame.time.Clock()
         self.running = True
 
@@ -60,6 +55,42 @@ class Engine:
     def quit(self) -> None:
         self.running = False
 
+    # ----- Display mode --------------------------------------------------
+    def _make_display(self, mode: str):
+        """Create the display surface for the requested mode.
+
+        Both modes use a fixed 960x540 logical resolution; fullscreen lets
+        pygame's SCALED flag upscale to the native monitor resolution while
+        keeping coordinates inside the game unchanged.
+        """
+        size = (config.SCREEN_WIDTH, config.SCREEN_HEIGHT)
+        if mode == "fullscreen":
+            try:
+                return pygame.display.set_mode(
+                    size, pygame.FULLSCREEN | pygame.SCALED
+                )
+            except pygame.error:
+                # Some SDL backends (e.g. the dummy driver used in CI) don't
+                # support SCALED — fall back to a normal window.
+                return pygame.display.set_mode(size)
+        return pygame.display.set_mode(size)
+
+    def set_display_mode(self, mode: str) -> None:
+        if mode not in ("windowed", "fullscreen"):
+            return
+        if mode == self.display_mode:
+            return
+        self.display_mode = mode
+        self.screen = self._make_display(mode)
+
+    def toggle_fullscreen(self) -> None:
+        new = "fullscreen" if self.display_mode == "windowed" else "windowed"
+        self.set_display_mode(new)
+        # Persist so the choice survives the next launch.
+        if self.save_data:
+            save_mgr.get_settings(self.save_data)["display_mode"] = new
+            save_mgr.save(self.save_data)
+
     def run(self, initial_state) -> None:
         self.fsm.change_to(initial_state)
 
@@ -81,6 +112,11 @@ class Engine:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.running = False
+                elif (event.type == pygame.KEYDOWN
+                      and event.key == pygame.K_F11):
+                    # F11 toggles fullscreen at engine level — works in
+                    # any state, doesn't need each State to wire it.
+                    self.toggle_fullscreen()
                 else:
                     self.fsm.handle_event(event)
 
