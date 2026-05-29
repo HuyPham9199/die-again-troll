@@ -297,9 +297,13 @@ class Slider:
     def draw(self, surface: pygame.Surface,
              font_label: pygame.font.Font,
              font_value: pygame.font.Font) -> None:
-        # Label above the track — same 8 px breathing room as TextField.
+        # Label centred on the track's horizontal centre. Caller is expected
+        # to place the track so its centerx equals the desired column centre;
+        # the label then naturally lands centred too.
         lbl = font_label.render(self.label, True, config.COLOR_TEXT)
-        surface.blit(lbl, (self.rect.left, self.rect.top - lbl.get_height() - 8))
+        surface.blit(lbl, lbl.get_rect(midbottom=(
+            self.rect.centerx, self.rect.top - 6,
+        )))
         # Track background.
         pygame.draw.rect(surface, (24, 24, 36), self.rect, border_radius=4)
         pygame.draw.rect(surface, (70, 70, 100), self.rect, 1, border_radius=4)

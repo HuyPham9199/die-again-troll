@@ -53,9 +53,12 @@ class PauseState(State):
     def _build_widgets(self, cx: int) -> None:
         ct = self.card_top
 
-        # Audio sliders inside the card.
-        slider_w = 240
-        slider_x = cx - 30
+        # Audio sliders inside the card. Track centerx == card centerx so
+        # the (- track +) assembly *and* the centred label both line up
+        # vertically with the rest of the card content. Width is tuned so
+        # the value readout on the right still fits inside the card.
+        slider_w = 200
+        slider_x = cx - slider_w // 2
         self.music_slider = Slider(
             pygame.Rect(slider_x, ct + 142, slider_w, 14),
             "MUSIC",

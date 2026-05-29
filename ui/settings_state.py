@@ -56,9 +56,11 @@ class SettingsState(State):
         )
 
         # --- Audio sliders (Music + SFX only) --------------------------
+        # Track centerx aligns with the audio panel's centre so the label,
+        # track and value readout all sit on the same vertical axis.
         audio_top = SECT_AUDIO_Y + HEADER_TO_PANEL
         slider_w = 280
-        slider_x = cx - 50
+        slider_x = cx - slider_w // 2
         slider_y0 = audio_top + 34
         gap = 56
         s_music = Slider(
