@@ -140,20 +140,27 @@ class Player:
 
     # ----------------------------------------------------------------------
     def draw(self, surface: pygame.Surface, camera) -> None:
-        """Draw a 5-limb skeleton in float screen space.
+        """Draw the player.
 
-        Everything that follows treats `screen_x/y` as float; pygame's draw
-        primitives round once internally, so the player never stutters
-        between two pixel positions per frame.
+        Preferred path: blit a frame from the loaded sprite sheet (smooth,
+        no per-pixel jitter). Fallback path: procedural skeleton if the
+        sheet is missing — keeps the game playable before art is dropped in.
         """
         if not self.alive:
             return
 
+        # Try the sprite first.
+        from entities.player_sprites import get_player_sprites
+        sprites = get_player_sprites()
+        if sprites is not None:
+            self._draw_sprite(surface, camera, sprites)
+            return
+
+        # --- Fallback: procedural skeleton --------------------------------
         body_color = config.COLOR_PLAYER
         outline = (40, 10, 30)
         accent = (255, 200, 230)
 
-        # Float screen-space origin (top-left of the player rect).
         sx0, sy0 = camera.world_to_screen(self.fx, self.fy)
         cx = sx0 + self.WIDTH / 2
 
@@ -230,6 +237,36 @@ class Player:
                            (cx + eye_off, head_cy - 1), 1)
         pygame.draw.circle(surface, accent,
                            (cx + 3.0 * face, head_cy + 2), 1)
+
+    # ----------------------------------------------------------------------
+    def _draw_sprite(self, surface: pygame.Surface, camera,
+                     sprites: dict) -> None:
+        """Sprite-driven render path. Picks a frame for the current state,
+        flips for facing, blits feet-aligned to the bottom of the rect."""
+        # Pick frame.
+        if not self.is_grounded:
+            frame = sprites["jump"]
+        elif abs(self.vx) > 1.0:
+            # 2-frame walk cycle. anim_phase already increments with the
+            # player's horizontal speed (in radians), so we tick the frame
+            # over every π of phase — natural step rhythm.
+            idx = int(self.anim_phase / math.pi) % 2
+            frame = sprites["walk_a"] if idx == 0 else sprites["walk_b"]
+        else:
+            frame = sprites["idle"]
+
+        # Mirror for facing-left.
+        if self.facing < 0:
+            frame = pygame.transform.flip(frame, True, False)
+
+        # Bottom-centre the sprite on the hit-box so the feet line up with
+        # whatever surface the player is standing on.
+        sx, sy = camera.world_to_screen(self.fx, self.fy)
+        cx = sx + self.WIDTH / 2
+        bottom_y = sy + self.HEIGHT
+        blit_x = cx - frame.get_width() / 2
+        blit_y = bottom_y - frame.get_height()
+        surface.blit(frame, (blit_x, blit_y))
 
 
 def _thick_line(surface, fill, outline, x1, y1, x2, y2, width):

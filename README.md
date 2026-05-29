@@ -113,5 +113,6 @@ MIT — see [LICENSE](LICENSE).
 ## Credits
 
 - Game design + code: Huy Phạm
+- Pixelated character sprite: <a href="http://www.freepik.com">Designed by Alekksall / Freepik</a> — used under the Freepik free license, attribution required
 - Logo and audio assets: see individual file attributions in `assets/`
 - Engine architecture: per the project's GDD (rage-platformer master blueprint)
