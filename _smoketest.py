@@ -169,7 +169,7 @@ def main():
     assert_state(engine, LevelSelectState, "to-levelselect")
     ls = engine.fsm.current
     print(f"OK LevelSelect — {len(ls.level_paths)} normal levels visible")
-    assert len(ls.level_paths) >= 20, "expected 20 normal levels"
+    assert len(ls.level_paths) >= 25, "expected 25 normal levels"
 
     click_at(*ls.tile_rects[0].center)  # level 1
     tick(engine, 2)

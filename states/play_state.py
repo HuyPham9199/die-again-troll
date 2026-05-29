@@ -113,6 +113,15 @@ class PlayState(State):
         for cr in self.level.crushers:
             if cr.is_solid:
                 active_solids.append(cr.rect)
+        for gs in self.level.ground_spikes:
+            # Always solid — that's the whole deception.
+            active_solids.append(gs.rect)
+        for tf in self.level.timed_floors:
+            if tf.is_solid:
+                active_solids.append(tf.rect)
+        for fb in self.level.falling_blocks:
+            if fb.is_solid:
+                active_solids.append(fb.rect)
 
         # ---- Input vector + reverse-zone flip ----------------------------
         left = self.input_left or self.mobile.left_held
@@ -176,6 +185,35 @@ class PlayState(State):
                 self._kill_player(cause="fake_portal")
                 break
 
+        # Ground spikes — erupt when player lands on top.
+        for gs in self.level.ground_spikes:
+            gs.maybe_trigger(self.player.rect)
+            gs.update(dt)
+            if self.player.alive and gs.kills(self.player.rect):
+                self._kill_player()
+                break
+
+        # Timed floors — start their fuse on first contact.
+        for tf in self.level.timed_floors:
+            tf.check(self.player.rect)
+            tf.update(dt)
+
+        # Falling blocks — column-triggered fast drop.
+        for fb in self.level.falling_blocks:
+            fb.maybe_trigger(self.player.rect)
+            fb.update(dt, self.level.solids)
+            if self.player.alive and fb.kills(self.player.rect):
+                self._kill_player()
+                break
+
+        # Fake checkpoints — kill on touch like fake goals.
+        for fc in self.level.fake_checkpoints:
+            fc.update(dt)
+            if self.player.alive and fc.kills(self.player.rect):
+                fc.mark_triggered()
+                self._kill_player(cause="fake_portal")
+                break
+
         # Fell off the bottom of the world → die.
         if self.player.alive and self.player.rect.top > self.level.world_h + 200:
             self._kill_player()
@@ -230,6 +268,19 @@ class PlayState(State):
             cs.draw(surface, self.camera, debug=self.show_debug)
         for cr in self.level.crushers:
             cr.draw(surface, self.camera, debug=self.show_debug)
+
+        # Ground spikes, timed floors, falling blocks — drawn over solids,
+        # under the player.
+        for gs in self.level.ground_spikes:
+            gs.draw(surface, self.camera, debug=self.show_debug)
+        for tf in self.level.timed_floors:
+            tf.draw(surface, self.camera, debug=self.show_debug)
+        for fb in self.level.falling_blocks:
+            fb.draw(surface, self.camera, debug=self.show_debug)
+
+        # Fake checkpoints (decoy power-ups).
+        for fc in self.level.fake_checkpoints:
+            fc.draw(surface, self.camera, debug=self.show_debug)
 
         # Fake goals first so the real portal sparkles draw on top of them
         # (gives the real one a *slight* edge on close inspection).
@@ -336,6 +387,14 @@ class PlayState(State):
             cr.reset()
         for fg in self.level.fake_goals:
             fg.reset()
+        for gs in self.level.ground_spikes:
+            gs.reset()
+        for tf in self.level.timed_floors:
+            tf.reset()
+        for fb in self.level.falling_blocks:
+            fb.reset()
+        for fc in self.level.fake_checkpoints:
+            fc.reset()
         if count_death:
             save_mgr.record_death(self.engine.save_data)
 

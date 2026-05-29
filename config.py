@@ -31,6 +31,14 @@ TILE_INVISIBLE_BLOCK = 3
 TILE_FAKE_FLOOR = 4          # looks solid; collapses when stepped on
 TILE_CEILING_SPIKE = 5       # hangs from above, drops on the player below
 TILE_CRUSHER = 6             # floats up high, slams down when player enters its column
+TILE_GROUND_SPIKE = 7        # looks like normal floor; spikes erupt upward on contact
+TILE_TIMED_FLOOR = 8         # looks like floor; cracks then disappears after a short delay
+TILE_FALLING_BLOCK = 9       # heavy block in the air; instant drop when player walks under
+
+# Per-trap tunables.
+GROUND_SPIKE_WIND_UP = 0.08  # seconds before the eruption becomes lethal
+TIMED_FLOOR_BREAK_TIME = 0.4 # seconds from first touch to full collapse
+FALLING_BLOCK_SPEED = 2000.0 # px/s constant drop velocity
 
 # How long a fake floor stays "crumbling" before disappearing entirely.
 # Short enough that a player walking onto it cannot outrun the collapse.

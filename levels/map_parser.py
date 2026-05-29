@@ -26,6 +26,10 @@ from entities.traps import (
     Crusher,
     FakeGoal,
     ReverseZone,
+    GroundSpike,
+    TimedFloor,
+    FallingBlock,
+    FakeCheckpoint,
 )
 
 
@@ -46,6 +50,10 @@ class LevelData:
     crushers: list[Crusher] = field(default_factory=list)
     fake_goals: list[FakeGoal] = field(default_factory=list)
     reverse_zones: list[ReverseZone] = field(default_factory=list)
+    ground_spikes: list[GroundSpike] = field(default_factory=list)
+    timed_floors: list[TimedFloor] = field(default_factory=list)
+    falling_blocks: list[FallingBlock] = field(default_factory=list)
+    fake_checkpoints: list[FakeCheckpoint] = field(default_factory=list)
 
     @property
     def world_w(self) -> int:
@@ -108,12 +116,21 @@ def load_level(path: str) -> LevelData:
                 data.ceiling_spikes.append(CeilingSpike(rect, grid))
             elif code == config.TILE_CRUSHER:
                 data.crushers.append(Crusher(rect))
+            elif code == config.TILE_GROUND_SPIKE:
+                data.ground_spikes.append(GroundSpike(rect))
+            elif code == config.TILE_TIMED_FLOOR:
+                data.timed_floors.append(TimedFloor(rect))
+            elif code == config.TILE_FALLING_BLOCK:
+                data.falling_blocks.append(FallingBlock(rect))
             # TILE_AIR → nothing
 
     # Optional extras keyed by name. Coords are tile units, converted to px.
     for col, row in raw.get("decoy_goals", []):
         gr = pygame.Rect(col * grid, row * grid, grid, grid)
         data.fake_goals.append(FakeGoal(gr))
+    for col, row in raw.get("fake_checkpoints", []):
+        cr = pygame.Rect(col * grid, row * grid, grid, grid)
+        data.fake_checkpoints.append(FakeCheckpoint(cr))
     for z in raw.get("reverse_zones", []):
         # Accepts [c0, r0, c1, r1] (inclusive on both ends).
         c0, r0, c1, r1 = z
