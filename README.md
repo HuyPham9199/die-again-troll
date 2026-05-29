@@ -57,7 +57,6 @@ python main.py
 | Jump | `Space` / `W` / `↑` | Bottom-right button |
 | Restart level | `R` | — |
 | Pause | `Esc` | — |
-| Debug overlay (show trigger zones) | `F1` | — |
 
 ## Project layout
 

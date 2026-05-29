@@ -35,7 +35,11 @@ class PlayState(State):
         self.deaths_this_level = 0
         self.input_left = False
         self.input_right = False
-        self.show_debug = False   # F1 toggles trigger overlay
+        # Debug overlay disabled in the released build — revealing every
+        # trap defeats the whole point of a troll game. Left as a property
+        # rather than removed entirely so the trap.draw signatures still
+        # accept a debug kwarg (no behaviour change when always False).
+        self.show_debug = False
         self.paused = False
         self.victory = False
         self.victory_timer = 0.0
@@ -67,8 +71,6 @@ class PlayState(State):
                 from ui.pause_state import PauseState
                 self.machine.push(PauseState(self.machine))
                 return
-            if event.key == pygame.K_F1:
-                self.show_debug = not self.show_debug
             if event.key == pygame.K_r:
                 self._reset_player(count_death=False)
             if event.key in (pygame.K_LEFT, pygame.K_a):
@@ -325,7 +327,7 @@ class PlayState(State):
             True, config.COLOR_TEXT,
         )
         line2 = self.engine.font_sm.render(
-            "R restart   ESC menu   F1 debug",
+            "R restart   ESC menu",
             True, config.COLOR_TEXT_DIM,
         )
         surface.blit(line1, (12, 8))
