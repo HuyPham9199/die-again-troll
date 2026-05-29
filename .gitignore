@@ -1,0 +1,46 @@
+# --- Python ---
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# --- Virtual envs ---
+.venv/
+venv/
+env/
+
+# --- Build artifacts ---
+build/
+dist/
+*.spec
+.bin/
+bin/
+
+# --- Android (Buildozer) ---
+.buildozer/
+*.apk
+
+# --- Local game data (per-device, contains user account + progress) ---
+save.dat
+game.db
+
+# --- Dev preview/screenshot scratch ---
+_*_preview.png
+_*_check.py
+
+# --- GDD extraction scratch ---
+_gdd_*
+_gdd_unpacked/
+
+# --- IDE / tooling ---
+.vscode/
+.idea/
+.claude/
+
+# --- Misc ---
+*.log
+*.bak

@@ -1,0 +1,55 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  smoke-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install SDL2 (Linux needs it for pygame-ce)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libsdl2-2.0-0 libsdl2-image-2.0-0 \
+                                  libsdl2-mixer-2.0-0 libsdl2-ttf-2.0-0
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Compile-check every .py file
+        run: |
+          python -c "
+          import py_compile, os, sys
+          ok = True
+          for root, _, files in os.walk('.'):
+              if '__pycache__' in root: continue
+              for f in files:
+                  if f.endswith('.py'):
+                      p = os.path.join(root, f)
+                      try:
+                          py_compile.compile(p, doraise=True)
+                      except py_compile.PyCompileError as e:
+                          ok = False
+                          print('FAIL', p, e)
+          sys.exit(0 if ok else 1)
+          "
+
+      - name: Run headless smoke test
+        env:
+          SDL_VIDEODRIVER: dummy
+          SDL_AUDIODRIVER: dummy
+        run: python _smoketest.py
