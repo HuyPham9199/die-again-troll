@@ -8,9 +8,9 @@ Built in **Python 3** + **Pygame-CE** following a [hand-written GDD](docs/Do_An_
 
 ## Features
 
-- **20 hand-crafted levels** in Normal mode with progressively cruel troll mechanics
-- **Nightmare mode** unlocked after clearing 5 Normal levels (`floor(level / 5)` formula)
-- **6 trap types**: hidden spikes, invisible blocks, fake floors, ceiling spikes, crushers, and fake portals
+- **25 hand-crafted levels** in Normal mode with progressively cruel troll mechanics
+- **5 Nightmare levels** unlocked after clearing 5 Normal levels (`floor(level / 5)` formula)
+- **10 trap types**: hidden spikes, invisible blocks, fake floors, ceiling spikes, crushers, fake portals, ground spikes (erupt on contact), timed floors (crumble after 0.4s), falling blocks (instant drop), fake checkpoints (lethal "power-ups")
 - **Reverse-control zones** that flip A↔D without warning
 - **Account system** with local SQLite-backed register / login / sign out (architecture ready to swap for Supabase or Firebase)
 - **Cloud-style sync**: progress + death counter persist per-user; `last_username` is remembered per-device
@@ -89,7 +89,12 @@ Drop a new JSON file in `levels/data/normal/`:
 }
 ```
 
-**Tile codes**: `0` air · `1` solid · `2` hidden spike · `3` invisible block · `4` fake floor · `5` ceiling spike · `6` crusher
+**Tile codes**: `0` air · `1` solid · `2` hidden spike · `3` invisible block · `4` fake floor · `5` ceiling spike · `6` crusher · `7` ground spike (erupts on contact) · `8` timed floor (crumbles after 0.4s) · `9` falling block (drops when player enters its column)
+
+**JSON extras** (optional arrays at top level):
+- `decoy_goals: [[col, row], ...]` — portals that look real but kill on touch
+- `fake_checkpoints: [[col, row], ...]` — rotating-star lures that kill on touch
+- `reverse_zones: [[c0, r0, c1, r1], ...]` — invisible rectangles that flip A↔D
 
 ## Tech stack
 
