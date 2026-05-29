@@ -38,6 +38,10 @@ game.db
 /_sprite_*.py
 /_gameplay_*.png
 /_sprite_*.png
+/_commit_msg.txt
+/_migration_check.py
+/_unlock_check.py
+/_traps_check.py
 
 # --- GDD extraction scratch ---
 _gdd_*
