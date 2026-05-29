@@ -70,10 +70,15 @@ class Player:
         if input_x != 0:
             self.facing = input_x
 
-        # Gravity.
-        self.vy += config.GRAVITY * dt
-        if self.vy > config.PLAYER_MAX_FALL:
-            self.vy = config.PLAYER_MAX_FALL
+        # Gravity — ONLY when airborne. While grounded, vy stays at zero
+        # so the int(fy) doesn't drift downward each frame (the old code
+        # accumulated 0.67 px/frame of gravity even when sitting on solid
+        # ground, which caused is_grounded to flicker True/False as the
+        # rect drifted just past pixel-touching the floor).
+        if not self.is_grounded:
+            self.vy += config.GRAVITY * dt
+            if self.vy > config.PLAYER_MAX_FALL:
+                self.vy = config.PLAYER_MAX_FALL
 
         # Jump (with coyote + buffer).
         self.jump_buffer = max(0.0, self.jump_buffer - dt)
@@ -83,7 +88,6 @@ class Player:
             self.is_grounded = False
             self.jump_buffer = 0.0
             self.coyote_timer = 0.0
-            # Local import — avoids a circular at module load.
             from systems import audio
             audio.play_sfx("jump")
 
@@ -103,7 +107,6 @@ class Player:
 
         # Y second
         was_grounded = self.is_grounded
-        self.is_grounded = False
         self.fy += self.vy * dt
         self.rect.y = int(self.fy)
         for s in solids:
@@ -111,11 +114,22 @@ class Player:
                 continue
             if self.vy > 0:           # falling — hit floor
                 self.rect.bottom = s.top
-                self.is_grounded = True
             elif self.vy < 0:         # rising — hit ceiling
                 self.rect.top = s.bottom
             self.fy = float(self.rect.y)
             self.vy = 0.0
+
+        # Ground probe: am I sitting on a solid? Move the rect 1 px down
+        # and look for any overlap. Catches the touching-not-overlapping
+        # case that colliderect misses, so is_grounded is stable across
+        # frames once the player has settled.
+        probe = self.rect.move(0, 1)
+        grounded_now = False
+        for s in solids:
+            if probe.colliderect(s):
+                grounded_now = True
+                break
+        self.is_grounded = grounded_now and self.vy >= 0
 
         # Coyote: just walked off a ledge this frame.
         if was_grounded and not self.is_grounded:
