@@ -5,7 +5,7 @@ SCREEN_WIDTH = 960
 SCREEN_HEIGHT = 540
 FPS_CAP = 120
 TITLE = "Die Agail: Troll"
-VERSION = "1.0.01"
+VERSION = "1.0.02"
 FPS_REFRESH_SECONDS = 5.0     # how often the on-screen FPS readout updates
 
 # --- World ---

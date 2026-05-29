@@ -14,7 +14,7 @@ Single-file portable build — no installer, no Python required. Double-click to
 
 > On first launch Windows SmartScreen may flag the .exe as "unrecognised" because it's an unsigned indie build. Click **More info → Run anyway**. Your save (`save.dat`) and account database (`game.db`) are created next to the .exe.
 
-Current version: **v1.0.01**.
+Current version: **v1.0.02**.
 
 ## Features
 
