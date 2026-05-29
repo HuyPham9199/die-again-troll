@@ -29,12 +29,14 @@ from typing import Any, Optional
 
 def _db_path() -> str:
     # Tests can override via DIEAGAIN_DB_PATH so the smoke run doesn't
-    # destroy the real player's accounts. Production: env var unset, falls
-    # back to game.db in cwd.
+    # destroy the real player's accounts. Production launches use AppData
+    # (same folder as save.dat), migrating from cwd on first run so
+    # upgrading from v1.0.02 keeps every account intact.
     override = os.environ.get("DIEAGAIN_DB_PATH")
     if override:
         return override
-    return os.path.join(os.getcwd(), "game.db")
+    from systems.paths import migrate_legacy_file
+    return migrate_legacy_file("game.db")
 
 
 # ---------------------------------------------------------------- internals

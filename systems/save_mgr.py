@@ -42,12 +42,13 @@ DEFAULT_DATA: dict[str, Any] = {
 
 def _path() -> str:
     # Tests can override via DIEAGAIN_SAVE_PATH so a smoke run doesn't
-    # clobber the real player's save.dat. Production launches see the
-    # env var unset and fall back to the default cwd path.
+    # clobber the real player's save.dat. Production launches use AppData,
+    # migrating any v1.0.02-era save next to the .exe on first run.
     override = os.environ.get("DIEAGAIN_SAVE_PATH")
     if override:
         return override
-    return os.path.join(os.getcwd(), config.SAVE_FILE)
+    from systems.paths import migrate_legacy_file
+    return migrate_legacy_file(config.SAVE_FILE)
 
 
 def load() -> dict[str, Any]:

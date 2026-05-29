@@ -14,7 +14,9 @@ Single-file portable build — no installer, no Python required. Double-click to
 
 > On first launch Windows SmartScreen may flag the .exe as "unrecognised" because it's an unsigned indie build. Click **More info → Run anyway**. Your save (`save.dat`) and account database (`game.db`) are created next to the .exe.
 
-Current version: **v1.0.02**.
+Current version: **v1.0.03**.
+
+> 💾 **Your progress is safe across updates.** Starting v1.0.03, `save.dat` and `game.db` live in `%APPDATA%\DieAgailTroll\` (Windows) so you can replace the .exe without losing your account or cleared levels. Anything left over from v1.0.02 in the old location is migrated automatically the first time you launch.
 
 ## Features
 
