@@ -1,4 +1,4 @@
-# Die Again: Troll
+# Die Agail: Troll
 
 A 2D rage-platformer in the spirit of *Cat Mario* and *Level Devil*. Every floor might collapse, every spike might be hidden, and at least one portal in every level is a lie. Trust nothing — not even the gate.
 
