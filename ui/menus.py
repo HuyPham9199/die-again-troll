@@ -243,6 +243,15 @@ class MainMenuState(_MenuBase):
         surface.blit(hint, hint.get_rect(
             center=(cx, config.SCREEN_HEIGHT - 32)
         ))
+        # Version stamp — bottom-right corner so players know what
+        # build they're on when reporting bugs.
+        version_label = self.engine.font_sm.render(
+            f"v{config.VERSION}", True, (90, 100, 130),
+        )
+        surface.blit(version_label, (
+            config.SCREEN_WIDTH - version_label.get_width() - 12,
+            config.SCREEN_HEIGHT - version_label.get_height() - 8,
+        ))
 
 
 # ----------------------------------------------------------------------------

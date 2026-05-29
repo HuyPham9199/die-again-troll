@@ -1,0 +1,63 @@
+name: Release build
+
+# Triggers whenever a tag like v1.0.01 (or v2.x, etc.) is pushed.
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write     # required to upload assets to a Release
+
+jobs:
+  windows-exe:
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies + PyInstaller
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pyinstaller pillow
+
+      - name: Build single-file Windows executable
+        run: |
+          pyinstaller --onefile --windowed --noconfirm --clean `
+            --icon assets/logo.png `
+            --add-data "assets;assets" `
+            --add-data "levels;levels" `
+            --name DieAgailTroll `
+            main.py
+
+      - name: Show artefact size
+        run: |
+          $f = Get-Item dist/DieAgailTroll.exe
+          Write-Host "Built $($f.Name) — $([math]::Round($f.Length/1MB,1)) MB"
+
+      - name: Publish to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/DieAgailTroll.exe
+          generate_release_notes: true
+          # Append helpful body text describing what to do with the .exe.
+          body: |
+            ## Die Agail: Troll — ${{ github.ref_name }}
+
+            **Download `DieAgailTroll.exe` below.** It's a single-file
+            portable build — no installer, no Python required. Just
+            double-click on Windows 10/11.
+
+            On first launch Windows Defender may show a SmartScreen
+            warning (unsigned indie build) — click **More info** →
+            **Run anyway**.
+
+            Your save (`save.dat`) and account database (`game.db`)
+            are created next to the .exe the first time you play.

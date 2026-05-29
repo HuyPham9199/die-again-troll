@@ -6,6 +6,16 @@ Built in **Python 3** + **Pygame-CE** following a [hand-written GDD](docs/Do_An_
 
 ![Main menu](docs/screenshots/main_menu.png)
 
+## Download — Windows
+
+**[⬇️ DieAgailTroll.exe (latest release)](https://github.com/HuyPham9199/die-again-troll/releases/latest)**
+
+Single-file portable build — no installer, no Python required. Double-click to play on Windows 10/11.
+
+> On first launch Windows SmartScreen may flag the .exe as "unrecognised" because it's an unsigned indie build. Click **More info → Run anyway**. Your save (`save.dat`) and account database (`game.db`) are created next to the .exe.
+
+Current version: **v1.0.01**.
+
 ## Features
 
 - **25 hand-crafted levels** in Normal mode with progressively cruel troll mechanics
